@@ -8,17 +8,17 @@ import io
 import torch
 import torch.utils#.d
 
-def get_dim(msk):
-    x = msk.unsqueeze(0) # dimensions of non-zero Mask as cube
+# def get_dim(msk):
+#     x = msk.unsqueeze(0) # dimensions of non-zero Mask as cube
 
-    non_zero = (x!=0).nonzero()  # Contains non-zero indices for all 4 dims
-    h_min = non_zero[:, 1].min()
-    h_max = non_zero[:, 1].max()
-    w_min = non_zero[:, 2].min()
-    w_max = non_zero[:, 2].max()
-    d_min = non_zero[:, 3].min()
-    d_max = non_zero[:, 3].max()
-    return(h_min,h_max,w_min,w_max,d_min,d_max)
+#     non_zero = (x!=0).nonzero()  # Contains non-zero indices for all 4 dims
+#     h_min = non_zero[:, 1].min()
+#     h_max = non_zero[:, 1].max()
+#     w_min = non_zero[:, 2].min()
+#     w_max = non_zero[:, 2].max()
+#     d_min = non_zero[:, 3].min()
+#     d_max = non_zero[:, 3].max()
+#     return(h_min,h_max,w_min,w_max,d_min,d_max)
 def tumor_patch(img,msk,seg_orig):
 #     print(img.size(),msk.size())
     width=64
@@ -37,10 +37,11 @@ def tumor_patch(img,msk,seg_orig):
 
     flag=False
     counter=0
+    # get the dimensions and keep testing to reach optimal conditions for patch requirements
     while flag==False:
         counter+=1
         try:
-            wt1=np.random.randint(w_min,w_max-width)  # atlease n pixels of tumor present
+            wt1=np.random.randint(w_min,w_max-width)  # keep relaxing constraint as tumor is too small is some cases
         except:
             try:wt1=np.random.randint(w_min,w_max-(width//2))
             except: wt1=np.random.randint(w_min,w_max-(width//4))    
@@ -82,7 +83,7 @@ def tumor_patch(img,msk,seg_orig):
 
 #         print(img.size())
 #         print(np.linspace(ht1,ht2,ht2-ht1+1))
-        not_tumor_img=img[:,ht1:ht2,wt1:wt2,dt1:dt2] #not_tumor is tumor
+        not_tumor_img=img[:,ht1:ht2,wt1:wt2,dt1:dt2] #not_tumor=tumor is tumor
 #         print(np.linspace(ht1,ht2,ht2-ht1+1))
 #         print(not_tumor_img.size())
         black=torch.sum(not_tumor_img==0).float()
@@ -96,7 +97,7 @@ def tumor_patch(img,msk,seg_orig):
     
 #         print('frac',frac)
         
-        if counter>50:
+        if counter>50: # in cases we cant get our required frac of non zero pixels
             only_masks=msk[ht1:ht2,wt1:wt2,dt1:dt2]
 #             print('counter return')
             return(not_tumor_img,only_masks)
