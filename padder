@@ -4,3 +4,6 @@ def padder(img):
     return(padded.transpose(2,3).transpose(3,4))
     
 [40:212,30:202,15:143] 
+
+from skimage.transform import resize
+resiz=resize(np.array(d['seg_orig']),[192/2, 192/2, 128],order=0,mode='constant', preserve_range=True)
