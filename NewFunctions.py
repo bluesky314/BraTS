@@ -27,3 +27,12 @@ def standardizer(img,st=standardizer_type,clamp=True):
     if clamp: img=torch.clamp(img,img.min(),quartiles[0])
 
     return(img)
+    
+    def classify_label(msk): 
+        v=np.zeros((msk.size()[-1],3))
+        for i in range(msk.size()[-1]):
+            if (msk[:,:,i]==1).any(): v[i,0]=1
+            if (msk[:,:,i]==2).any(): v[i,1]=1
+            if (msk[:,:,i]==3).any(): v[i,2]=1
+        return(torch.tensor(v))
+        
